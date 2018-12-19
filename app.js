@@ -4,14 +4,17 @@ const url = require('url');
 const path = require('path');
 
 
-const {app, BrowserWindow, Menu} = electron;
+const {app, BrowserWindow, Menu, ipcMain} = electron;
+
+//hello
+//SET EVN
+process.env.NODE_ENV = 'production';
 
 let mainWindow;
 let addWindow;
 const setting = {
     minWidth:400,
     minHeight:800,
-    backgroundColor:'#2e2c29',
     alwaysOnTop:true,
     frame:true,
     thickFrame:false,
@@ -52,13 +55,24 @@ function createAddWindow() {
         title: 'Add Shopping List Item'
     });
 
-    //load html
+   //load html
 
     addWindow.loadURL(url.format({
         pathname: path.join(__dirname, "addWindow.html"),
         protocol: 'file',
         slashes: true
     }));
+
+    //set menu only for this BrowserWindow
+    addWindow.setMenu(Menu.buildFromTemplate([
+        {
+            label:'DevToold',
+            submenu:[
+                {role:'toggledevtools'},
+                {role:'reload'}
+            ]
+        }
+    ]));
 
     //garbade coollection
     addWindow.on('close', function() {
@@ -67,10 +81,13 @@ function createAddWindow() {
 }
 
 
-
+//catch item:add
+ipcMain.on('item:add',(e,item) => {
+    mainWindow.webContents.send('item:add',item);
+    addWindow.close();
+});
 
 //create template
-
 const mainMenuTemplate = [
     {
         label: 'File',
@@ -82,7 +99,11 @@ const mainMenuTemplate = [
                 }
             },
             {
-                label: "Clear Item"
+                label: "Clear Item",
+                click()
+                {
+                    mainWindow.webContents.send('item:clear');
+                }
             },
             {
                 label: "Quit",
