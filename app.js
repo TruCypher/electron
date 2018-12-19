@@ -6,7 +6,6 @@ const path = require('path');
 
 const {app, BrowserWindow, Menu, ipcMain} = electron;
 
-//hello
 //SET EVN
 process.env.NODE_ENV = 'production';
 
